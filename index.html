@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Game</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter");
+      body {
+        background-color: #000;
+        color: #FFF;
+        font-family: "Inter";
+        font-size: 16vmin;
+        text-align: center;
+        user-select: none;
+        -webkit-user-select: none;
+        line-height: 13vmin;
+      }
+      canvas {
+        background-color: #000;
+      }
+      canvas, #text {
+        position: fixed;
+        top: 50vh;
+        left: 50vw;
+        width: 100vmin;
+        height: 100vmin;
+        transform: translate(-50%, -50%);
+      }
+      #text {
+        transform: translate(-50%, calc(-50% + 3vmin));
+      }
+      #text-1 {
+        color: #F88
+      }
+      #text-2 {
+        margin-top: 6vmin;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="100" height="100"></canvas>
+    <div id="text">
+      <div id="text-1">GAME<br>TITLE</div>
+      <div id="text-2">MOVE TO<br>START...</div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
