@@ -102,26 +102,23 @@ function movePlayer() {
     playerX += 1;
   }
   if (up) {
-    jump = 51;
+    jump = 16;
   }
   if (jump > 0) {
     jump--;
     if (onGround) {
       jump = 0;
       velocity = -1;
-    } else {
     }
-  } else {
   }
   if (onGround) {
     if (velocity > 0) {
       velocity = 0;
     }
   } else {
-    playerY += velocity;
     velocity += .05;
   }
-  console.debug(velocity);
+  playerY += velocity;
 }
 
 function spawnNormalBox(x, y, width, height, velX, velY) {
@@ -172,7 +169,6 @@ function draw() {
           i--;
         } else {
           drawRect(object.x, object.y, object.width, object.height, "#FFF");
-          console.debug(playerY + " • " + object.y);
           if (playerX >= object.x - 1 && playerX <= object.x + object.width + 1 && playerY >= object.y - 1 && playerY <= object.y + object.height + 1) {
             var distNegX = Math.abs(playerX - object.x);
             var distNegY = Math.abs(playerY - object.y);
@@ -184,7 +180,6 @@ function draw() {
             } else if (smallest == distNegY) {
               playerY = object.y - 1.001;
               onGround = true;
-              console.debug("Down");
             } else if (smallest == distPosX) {
               playerX = object.x + object.width + 1.001;
             } else {
