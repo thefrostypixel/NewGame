@@ -45,13 +45,14 @@ var playerY = 50;
 var velocity = 0;
 var onGround = false;
 
-var normalObjects = [{type:"box",x:47.5,y:100,width:5,height:5,velX:0,velY:-.1}];
+var normalObjects = [{type:"box",x:47.5,y:47.5,width:5,height:5,velX:0,velY:0}];
 var deadlyObjects = [];
 var notStarted = 21;
 var frameCount = 0;
 var scale = 1;
 
 var debug = false;
+var fly = false;
 
 function frame() {
   if (notStarted >= 0) {
@@ -84,7 +85,7 @@ function frame() {
 }
 
 function movePlayer() {
-  if (debug) {
+  if (debug && fly) {
     if (up) {
       playerY -= .5;
     } else if (down) {
@@ -106,9 +107,9 @@ function movePlayer() {
   }
   if (jump > 0) {
     jump--;
-    if (onGround) {
+    if (debug && up || onGround) {
       jump = 0;
-      velocity = -1;
+      velocity = -2;
     }
   }
   if (onGround) {
@@ -116,7 +117,8 @@ function movePlayer() {
       velocity = 0;
     }
   } else {
-    velocity += .05;
+    velocity += .1;
+    velocity *= .98;
   }
   playerY += velocity;
 }
@@ -170,10 +172,10 @@ function draw() {
         } else {
           drawRect(object.x, object.y, object.width, object.height, "#FFF");
           if (playerX >= object.x - 1 && playerX <= object.x + object.width + 1 && playerY >= object.y - 1 && playerY <= object.y + object.height + 1) {
-            var distNegX = Math.abs(playerX - object.x);
-            var distNegY = Math.abs(playerY - object.y);
-            var distPosX = Math.abs(playerX - object.x - object.width);
-            var distPosY = Math.abs(playerY - object.y - object.height);
+            var distNegX = Math.abs(playerX - object.x + 1);
+            var distNegY = Math.abs(playerY - object.y + 1);
+            var distPosX = Math.abs(playerX - object.x - object.width - 1);
+            var distPosY = Math.abs(playerY - object.y - object.height - 1);
             var smallest = Math.min(distNegX, distNegY, distPosX, distPosY);
             if (smallest == distNegX) {
               playerX = object.x - 1.001;
@@ -184,28 +186,12 @@ function draw() {
               playerX = object.x + object.width + 1.001;
             } else {
               playerY = object.y + object.height + 1.001;
+              if (velocity < 0) {
+                velocity = 0;
+              }
             }
           }
         }
-  
-        /* object.stage++;
-        if (object.stage == 24) {
-        } else if (object.stage < 10) {
-          c.fillStyle = "#FFF8";
-          c.fillRect(0, object.y - 1, 100, 2);
-        } else if (object.stage < 18) {
-          c.fillStyle = "#FFF";
-          c.fillRect(0, object.y - object.stage + 8, 100, (object.stage - 8) * 2);
-          if (playerY >= object.y - object.stage + 8 && playerY <= object.y + object.stage - 8) {
-            hit = true;
-          }
-        } else {
-          c.fillStyle = "#FFF";
-          c.fillRect(0, object.y - 24 + object.stage, 100, (24 - object.stage) * 2);
-          if (playerY >= object.y - 24 + object.stage && playerY <= object.y + 24 - object.stage) {
-            hit = true;
-          }
-        } */
         break;
       }
     }
