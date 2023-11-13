@@ -1,3 +1,4 @@
+// Key Presses
 document.addEventListener("keydown", function(event) {
   var moved = true;
   if (event.key === "ArrowUp" || event.key === "w") {
@@ -20,7 +21,7 @@ document.addEventListener("keydown", function(event) {
 document.addEventListener("keyup", function(event) {
   if (event.key === "ArrowUp" || event.key === "w") {
     up = false;
-  } else if (event.key === "ArrowDows" || event.key === "s") {
+  } else if (event.key === "ArrowDown" || event.key === "s") {
     down = false;
   } else if (event.key === "ArrowLeft" || event.key === "a") {
     left = false;
@@ -29,195 +30,257 @@ document.addEventListener("keyup", function(event) {
   }
 });
 
-var c = document.getElementById("canvas").getContext("2d");
-
-var keysImg = new Image();
-keysImg.src = "assets/keys.png";
-
+// Held Keys
 var up = false;
-var jump = 0;
 var down = false;
 var left = false;
 var right = false;
 
-var playerX = 50;
-var playerY = 50;
-var velocity = 0;
-var onGround = false;
+// Canvas
+var c = document.getElementById("canvas").getContext("2d");
 
-var normalObjects = [{type:"box",x:47.5,y:47.5,width:5,height:5,velX:0,velY:0}];
-var deadlyObjects = [];
+// Player Position
+var player = { x: 50, y: 50, speed: .5 };
+
+// Bounds
+var bounds = { x: 0, y: 0, width: 100, height: 100, duration: 0, anim: { x: 0, y: 0, width: 100, height: 100 } };
+
+// Objects
+var objects = [];
+
+// Game State
 var notStarted = 21;
-var frameCount = 0;
 var scale = 1;
+var score = 0;
+var level = 0;
+var levelFrame = 999;
+var levelNumber = -1;
 
-var debug = false;
-var fly = false;
+// Debug Settings
+var debug = { noBoundsColl: false, noObjColl: false };
 
 function frame() {
+  // Handle Not Started Screen
   if (notStarted >= 0) {
     notStarted++;
     if (notStarted == 20) {
-      document.getElementById("text-1").innerText = "YOU LOST!\nSCORE: " + Math.floor(frameCount / 50);
-      document.getElementById("text-2").innerText = "MOVE TO START...";
-      playerX = 50;
-      playerY = 50;
-      oldPlayerX = 50;
-      oldPlayerY = 50;
-      velocity = 0;
-      normalObjects = [];
-      deadlyObjects = [];
-      frameCount = 0;
+      document.getElementById("text-1").innerText = "YOU LOST!\nSCORE: " + score;
+      document.getElementById("text-2").innerText = "MOVE TO\nSTART...";
+      player = { x: 50, y: 50, speed: .5 };
+      bounds = { x: 0, y: 0, width: 100, height: 100, duration: 0, anim: { x: 0, y: 0, width: 100, height: 100 } };
+      objects = [];
+      score = 0;
+      levelFrame = 999;
+      levelNumber = -1;
     }
     if (notStarted >= 20) {
       scale = Math.min(window.innerWidth, window.innerHeight) * .01;
       document.getElementById("canvas").setAttribute("width", scale * 100);
       document.getElementById("canvas").setAttribute("height", scale * 100);
-      drawRect(0, 0, 100, 100, "#C00");
-      c.clearRect(scale, scale, 98 * scale, 98 * scale);
-      drawImg(3, 66, 1, keysImg);
+      drawRect(0, 0, 100, 100, "#FFF");
+      clearRect(1, 1, 98, 98);
     }
     return;
   }
-  movePlayer();
-  draw();
-  frameCount++;
-}
 
-function movePlayer() {
-  if (debug && fly) {
-    if (up) {
-      playerY -= .5;
-    } else if (down) {
-      playerY += .5;
-    } else if (left) {
-      playerX -= .5;
-    } else if (right) {
-      playerX += .5;
-    }
-    return;
-  }
-  if (left && !right) {
-    playerX -= 1;
-  } else if (right && !left) {
-    playerX += 1;
-  }
-  if (up) {
-    jump = 16;
-  }
-  if (jump > 0) {
-    jump--;
-    if (debug && up || onGround) {
-      jump = 0;
-      velocity = -2;
-    }
-  }
-  if (onGround) {
-    if (velocity > 0) {
-      velocity = 0;
-    }
+  // Animate Bounds
+  if (bounds.duration <= 0) {
+    bounds.anim.x = bounds.x;
+    bounds.anim.y = bounds.y;
+    bounds.anim.width = bounds.width;
+    bounds.anim.height = bounds.height;
   } else {
-    velocity += .1;
-    velocity *= .98;
+    bounds.anim.x += (bounds.x - bounds.anim.x) / bounds.duration;
+    bounds.anim.y += (bounds.y - bounds.anim.y) / bounds.duration;
+    bounds.anim.width += (bounds.width - bounds.anim.width) / bounds.duration;
+    bounds.anim.height += (bounds.height - bounds.anim.height) / bounds.duration;
+    bounds.duration--;
   }
-  playerY += velocity;
-}
 
-function spawnNormalBox(x, y, width, height, velX, velY) {
-  normalObjects.push({
-    type: "box",
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-    velX: velX,
-    velY: velY
-  });
-}
+  // Move The Player
+  var horizontal = (right - left) * player.speed;
+  var vertical = (down - up) * player.speed;
+  if (horizontal != 0 && vertical != 0) {
+    horizontal *= .707;
+    vertical *= .707;
+  }
+  player.x += horizontal;
+  player.y += vertical;
 
-function spawnDeadlyBox(x, y, width, height, velX, velY) {
-  normalObjects.push({
-    type: "box",
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-    velX: velX,
-    velY: velY
-  });
+  // Move Player In Bounds
+  if (!debug.noBoundsColl) {
+    if (player.x < bounds.anim.x + 2) {
+      player.x = bounds.anim.x + 2;
+    } else if (player.x > bounds.anim.x + bounds.anim.width - 2) {
+      player.x = bounds.anim.x + bounds.anim.width - 2;
+    }
+    if (player.y < bounds.anim.y + 2) {
+      player.y = bounds.anim.y + 2;
+    } else if (player.y > bounds.anim.y + bounds.anim.height - 2) {
+      player.y = bounds.anim.y + bounds.anim.height - 2;
+    }
+  }
+
+  // Spawn Objects
+  levelFrame++;
+  if (levelFrame % 50 == 0) {
+    score++;
+  }
+  if (levelFrame == 1000) {
+    level = Math.floor(Math.random() * 3);
+    levelFrame = 0;
+    levelNumber++;
+    console.log("Level: " + level + " • Difficulty: " + levelNumber);
+  }
+  switch (level) {
+    case 0: {
+      if (levelFrame == 0) {
+        bounds.x = 30;
+        bounds.y = 30;
+        bounds.width = 40;
+        bounds.height = 40;
+        bounds.duration = 50;
+      }
+      if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 900) {
+        if (Math.random() * 4 < 1) {
+          objects.push({type: "bullet", x: Math.random() * 30 + 35, y: -5, size: 5, vel: {x: 0, y: .5}});
+        } else if (Math.random() * 3 < 1) {
+          objects.push({type: "bullet", x: -5, y: Math.random() * 30 + 35, size: 5, vel: {x: .5, y: 0}});
+        } else if (Math.random() * 2 < 1) {
+          objects.push({type: "bullet", x: Math.random() * 30 + 35, y: 105, size: 5, vel: {x: 0, y: -.5}});
+        } else {
+          objects.push({type: "bullet", x: 105, y: Math.random() * 30 + 35, size: 5, vel: {x: -.5, y: 0}});
+        }
+      }
+      break;
+    }
+    case 1: {
+      if (levelFrame == 0) {
+        bounds.x = 35;
+        bounds.y = 45;
+        bounds.width = 30;
+        bounds.height = 10;
+        bounds.duration = 50;
+      }
+      bounds.y = 45 + Math.sin(levelFrame / 100 * Math.PI * 2) * 15;
+      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 900) {
+        objects.push({type: "bullet", x: -2, y: 50, size: 2, vel: {x: .5, y: 0}});
+      }
+      break;
+    }
+    case 2: {
+      if (levelFrame == 0) {
+        bounds.x = 0;
+        bounds.y = 0;
+        bounds.width = 100;
+        bounds.height = 100;
+        bounds.duration = 50;
+      }
+      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 900) {
+        objects.push({type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 50, expansion: 10, size: 10, decay: 10 }});
+      }
+      break;
+    }
+  }
+
+  // Handle Objects
+  handleObjects();
 }
 
 var stop = false;
 
-function draw() {
-  scale = Math.min(window.innerWidth, window.innerHeight) * .01;
+function handleObjects() {
+  // Canvas
+  scale = Math.min(window.innerWidth, window.innerHeight) * .01 - .5;
   document.getElementById("canvas").setAttribute("width", scale * 100);
   document.getElementById("canvas").setAttribute("height", scale * 100);
+
+  // Draw Bounds
+  drawRect(bounds.anim.x, bounds.anim.y, bounds.anim.width, bounds.anim.height, "#FFF");
+  clearRect(bounds.anim.x + 1, bounds.anim.y + 1, bounds.anim.width - 2, bounds.anim.height - 2);
+
+  // Move And Draw Objects And Detect Hits
   var hit = false;
-  onGround = false;
-  if (playerX < 2 || playerX > 98 || playerY < 2 || playerY > 98) {
-    hit = true;
-  }
-  for (var i = 0; i < normalObjects.length; i++) {
-    var object = normalObjects[i];
-    switch (object.type) {
-      case "box": {
-        if (!stop) {
-          object.x += object.velX;
-        object.y += object.velY;
+  for (var i = 0; i < objects.length; i++) {
+    var obj = objects[i];
+    switch (obj.type) {
+      case "bullet": {
+        obj.x += obj.vel.x;
+        obj.y += obj.vel.y;
+        if (obj.x < -obj.size || obj.y < -obj.size || obj.x > obj.size + 100 || obj.y > obj.size + 100) {
+          objects.splice(obj, 1);
+          break;
         }
-        if (object.x < -10 - object.width || object.x > 110 || object.y < -10 - object.height || object.y > 110) {
-          normalObjects.splice(i, 1);
-          i--;
-        } else {
-          drawRect(object.x, object.y, object.width, object.height, "#FFF");
-          if (playerX >= object.x - 1 && playerX <= object.x + object.width + 1 && playerY >= object.y - 1 && playerY <= object.y + object.height + 1) {
-            var distNegX = Math.abs(playerX - object.x + 1);
-            var distNegY = Math.abs(playerY - object.y + 1);
-            var distPosX = Math.abs(playerX - object.x - object.width - 1);
-            var distPosY = Math.abs(playerY - object.y - object.height - 1);
-            var smallest = Math.min(distNegX, distNegY, distPosX, distPosY);
-            if (smallest == distNegX) {
-              playerX = object.x - 1.001;
-            } else if (smallest == distNegY) {
-              playerY = object.y - 1.001;
-              onGround = true;
-            } else if (smallest == distPosX) {
-              playerX = object.x + object.width + 1.001;
-            } else {
-              playerY = object.y + object.height + 1.001;
-              if (velocity < 0) {
-                velocity = 0;
-              }
-            }
-          }
+        drawCircle(obj.x, obj.y, obj.size, "#FFF");
+        if ((obj.x - player.x) * (obj.x - player.x) + (obj.y - player.y) * (obj.y - player.y) < (obj.size + 1) * (obj.size + 1)) {
+          hit = true;
         }
         break;
       }
+      case "blast": {
+        if (obj.age == undefined) {
+          obj.age = 0;
+        }
+        obj.age++;
+        if (obj.age >= obj.explosion.delay + obj.explosion.expansion + obj.explosion.decay) {
+          objects.splice(obj, 1);
+          break;
+        } else if (obj.age >= obj.explosion.delay + obj.explosion.expansion) {
+          obj.size -= obj.size / obj.explosion.expansion;
+        } else if (obj.age >= obj.explosion.delay) {
+          obj.size += obj.explosion.size / obj.explosion.expansion;
+        }
+        drawLine(obj.x, obj.y, obj.rotation, obj.size, obj.age < obj.explosion.delay ? "#FFF8" : "#FFF");
+        const rotation = obj.rotation * Math.PI / 180;
+        const x1 = obj.x - Math.cos(rotation) * 200;
+        const y1 = obj.y - Math.sin(rotation) * 200;
+        const x2 = obj.x + Math.cos(rotation) * 200;
+        const y2 = obj.y + Math.sin(rotation) * 200;
+        if (obj.age >= obj.explosion.delay && (Math.abs((y2 - y1) * player.x - (x2 - x1) * player.y + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1)) * 2 < obj.size + 2)) {
+          hit = true;
+        }
+        break;
+      }
+      // Aiming Bullets
     }
   }
-  for (var i = 0; i < deadlyObjects.length; i++) {
-    //hit = hit || drawObject(deadlyObjects[i], true);
-  }
-  drawRect(0, 0, 100, 1, "#C00");
-  drawRect(0, 0, 1, 100, "#C00");
-  drawRect(99, 0, 1, 100, "#C00");
-  drawRect(0, 99, 100, 1, "#C00");
-  drawRect(playerX - 1, playerY - 1, 2, 2, hit && debug ? "#0CF" : "#08F");
+
+  // Draw Player And End Game If Hit
   if (hit) {
-    if (!debug) {
+    if (!debug.noObjColl) {
       notStarted = 0;
     }
+    drawCircle(player.x, player.y, 1, "#800");
+  } else {
+    drawCircle(player.x, player.y, 1, "#F00");
   }
 }
 
+// Canvas Drawing Functions
 function drawRect(x, y, width, height, color) {
   c.fillStyle = color;
   c.fillRect(x * scale, y * scale, width * scale, height * scale);
 }
 
-function drawImg(x, y, scaleMultiplier, img) {
-  c.drawImage(img, x * scale, y * scale, scaleMultiplier * scale * img.width, scaleMultiplier * scale * img.height);
+function clearRect(x, y, width, height) {
+  c.clearRect(x * scale, y * scale, width * scale, height * scale);
 }
 
+function drawCircle(x, y, radius, color) {
+  c.fillStyle = color;
+  c.beginPath();
+  c.arc(x * scale, y * scale, radius * scale, 0, 2 * Math.PI);
+  c.fill();
+}
+function drawLine(x, y, angle, size, color) {
+  c.beginPath();
+  c.strokeStyle = color;
+  c.lineWidth = size * scale;
+  const radians = angle * Math.PI / 180;
+  c.moveTo((x - Math.cos(radians) * 200) * scale, (y - Math.sin(radians) * 200) * scale);
+  c.lineTo((x + Math.cos(radians) * 200) * scale, (y + Math.sin(radians) * 200) * scale);
+  c.stroke();
+}
+
+// Frame Loop
 setInterval(frame, 20);
