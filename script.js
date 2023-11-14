@@ -27,6 +27,11 @@ document.addEventListener("keyup", function(event) {
     left = false;
   } else if (event.key === "ArrowRight" || event.key === "d") {
     right = false;
+  } else if (event.key === "Escape") {
+    paused = !paused;
+    document.getElementById("canvas").style.opacity = paused ? .5 : 1;
+    document.getElementById("text-1").innerText = paused ? "\nPAUSED!\n" : "";
+    document.getElementById("text-2").innerText = paused ? "PRESS ESC TO\nCONTINUE..." : "";
   }
 });
 
@@ -50,6 +55,7 @@ var objects = [];
 
 // Game State
 var notStarted = 21;
+var paused = false;
 var scale = 1;
 var score = 0;
 var level = 0;
@@ -60,7 +66,10 @@ var levelNumber = -1;
 var debug = { noBoundsColl: false, noObjColl: false };
 
 function frame() {
-  // Handle Not Started Screen
+  // Handle Paused Or Not Started
+  if (paused) {
+    return;
+  }
   if (notStarted >= 0) {
     notStarted++;
     if (notStarted == 20) {

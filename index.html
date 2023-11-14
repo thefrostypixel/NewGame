@@ -37,19 +37,18 @@
         height: calc(100 * var(--vmin));
         margin: calc(50vh - 50 * var(--vmin)) calc(50vw - 50 * var(--vmin));
       }
-      .text {
-        margin-top: calc(6 * var(--vmin));
-      }
       #text-1 {
         color: #F88;
       }
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="100" height="100"></canvas>
+    <canvas id="canvas" width="100" height="100" style="opacity: 1;"></canvas>
     <div id="text">
-      <div id="text-1" class="text">NEW<br>GAME</div>
-      <div id="text-2" class="text">MOVE TO<br>START...</div>
+      <br>
+      <div id="text-1">NEW<br>GAME</div>
+      <br>
+      <div id="text-2">MOVE TO<br>START...</div>
     </div>
     <script src="script.js"></script>
   </body>
