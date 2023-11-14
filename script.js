@@ -44,6 +44,9 @@ var right = false;
 // Canvas
 var c = document.getElementById("canvas").getContext("2d");
 
+// Debug Settings
+var debug = { startLevel: 0, noBoundsColl: false, noObjColl: false };
+
 // Player Position
 var player = { x: 50, y: 50, speed: .5 };
 
@@ -58,12 +61,9 @@ var notStarted = 21;
 var paused = false;
 var scale = 1;
 var score = 0;
-var level = 0;
+var level = debug.startLevel;
 var levelFrame = 999;
 var levelNumber = -1;
-
-// Debug Settings
-var debug = { noBoundsColl: false, noObjColl: false };
 
 function frame() {
   // Handle Paused Or Not Started
@@ -79,6 +79,7 @@ function frame() {
       bounds = { x: 0, y: 0, width: 100, height: 100, duration: 0, anim: { x: 0, y: 0, width: 100, height: 100 } };
       objects = [];
       score = 0;
+      level = debug.startLevel;
       levelFrame = 999;
       levelNumber = -1;
     }
@@ -137,9 +138,11 @@ function frame() {
   if (levelFrame == 1000) {
     var nextLevel;
     do {
-      nextLevel = Math.floor(Math.random() * 3);
+      nextLevel = Math.floor(Math.random() * 4);
     } while (nextLevel == level);
-    level = nextLevel;
+    if (levelNumber >= 0) {
+      level = nextLevel;
+    }
     levelFrame = 0;
     levelNumber++;
     console.log("Level: " + level + " • Difficulty: " + levelNumber);
@@ -188,8 +191,8 @@ function frame() {
         bounds.height = 100;
         bounds.duration = 50;
       }
-      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 950) {
-        objects.push({ type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 30, expansion: 5, size: 10, decay: 10 } });
+      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 930) {
+        objects.push({ type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 50, expansion: 5, size: 10, decay: 10 } });
       }
       break;
     }
@@ -234,6 +237,8 @@ function frame() {
       }
       break;
     }
+    // TODO Rings
+    // TODO Homing Bullets
   }
 
   // Canvas
@@ -285,7 +290,8 @@ function frame() {
         }
         break;
       }
-      // Aiming Bullets
+      // TODO Rings
+      // TODO Homing Bullets
     }
   }
 
