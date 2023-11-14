@@ -93,8 +93,7 @@ function frame() {
     bounds.anim.x += (bounds.x - bounds.anim.x) / bounds.duration;
     bounds.anim.y += (bounds.y - bounds.anim.y) / bounds.duration;
     bounds.anim.width += (bounds.width - bounds.anim.width) / bounds.duration;
-    bounds.anim.height += (bounds.height - bounds.anim.height) / bounds.duration;
-    bounds.duration--;
+    bounds.anim.height += (bounds.height - bounds.anim.height) / bounds.duration--;
   }
 
   // Move The Player
@@ -127,12 +126,16 @@ function frame() {
     score++;
   }
   if (levelFrame == 1000) {
-    level = Math.floor(Math.random() * 3);
+    var nextLevel;
+    do {
+      nextLevel = Math.floor(Math.random() * 3);
+    } while (nextLevel == level);
+    level = nextLevel;
     levelFrame = 0;
     levelNumber++;
     console.log("Level: " + level + " • Difficulty: " + levelNumber);
   }
-  switch (level) {
+  switch (level) { // Easiest At levelNumber 0 Should Go Up Until Maxing Out At levelNumber 20
     case 0: {
       if (levelFrame == 0) {
         bounds.x = 30;
@@ -143,13 +146,13 @@ function frame() {
       }
       if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 900) {
         if (Math.random() * 4 < 1) {
-          objects.push({type: "bullet", x: Math.random() * 30 + 35, y: -5, size: 5, vel: {x: 0, y: .5}});
+          objects.push({ type: "bullet", x: Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 } });
         } else if (Math.random() * 3 < 1) {
-          objects.push({type: "bullet", x: -5, y: Math.random() * 30 + 35, size: 5, vel: {x: .5, y: 0}});
+          objects.push({ type: "bullet", x: -5, y: Math.random() * 30 + 35, size: 5, vel: { x: .5, y: 0 } });
         } else if (Math.random() * 2 < 1) {
-          objects.push({type: "bullet", x: Math.random() * 30 + 35, y: 105, size: 5, vel: {x: 0, y: -.5}});
+          objects.push({ type: "bullet", x: Math.random() * 30 + 35, y: 105, size: 5, vel: { x: 0, y: -.5 } });
         } else {
-          objects.push({type: "bullet", x: 105, y: Math.random() * 30 + 35, size: 5, vel: {x: -.5, y: 0}});
+          objects.push({ type: "bullet", x: 105, y: Math.random() * 30 + 35, size: 5, vel: { x: -.5, y: 0 } });
         }
       }
       break;
@@ -164,7 +167,7 @@ function frame() {
       }
       bounds.y = 45 + Math.sin(levelFrame / 100 * Math.PI * 2) * 15;
       if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 900) {
-        objects.push({type: "bullet", x: -2, y: 50, size: 2, vel: {x: .5, y: 0}});
+        objects.push({ type: "bullet", x: -2, y: 50, size: 2, vel: { x: .5, y: 0 } });
       }
       break;
     }
@@ -176,20 +179,54 @@ function frame() {
         bounds.height = 100;
         bounds.duration = 50;
       }
-      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 900) {
-        objects.push({type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 50, expansion: 10, size: 10, decay: 10 }});
+      if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 950) {
+        objects.push({ type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 30, expansion: 5, size: 10, decay: 10 } });
+      }
+      break;
+    }
+    case 3: {
+      if (levelFrame == 0) {
+        bounds.x = 30;
+        bounds.y = 30;
+        bounds.width = 40;
+        bounds.height = 40;
+        bounds.duration = 50;
+      }
+      levelNumber = 20;
+      var timeFallOff = Math.min(Math.floor(levelNumber * .5), 10);
+      var delayFallOff = Math.min(Math.floor(levelNumber * .25), 5);
+      if (levelFrame == 50) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 0, size: 1, explosion: { delay: 30, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 90, size: 1, explosion: { delay: 30, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame == 100 - timeFallOff) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 45, size: 1, explosion: { delay: 30 - delayFallOff, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 135, size: 1, explosion: { delay: 30 - delayFallOff, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame == 150 - timeFallOff * 2) {
+        objects.push({ type: "blast", x: 50, y: 35, rotation: 0, size: 1, explosion: { delay: 30 - delayFallOff * 2, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 65, rotation: 0, size: 1, explosion: { delay: 30 - delayFallOff * 2, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 35, y: 50, rotation: 90, size: 1, explosion: { delay: 30 - delayFallOff * 2, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 65, y: 50, rotation: 90, size: 1, explosion: { delay: 30 - delayFallOff * 2, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame == 200 - timeFallOff * 3) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 0, size: 1, explosion: { delay: 30 - delayFallOff * 3, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 90, size: 1, explosion: { delay: 30 - delayFallOff * 3, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame == 250 - timeFallOff * 4) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 45, size: 1, explosion: { delay: 30 - delayFallOff * 4, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 135, size: 1, explosion: { delay: 30 - delayFallOff * 4, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame >= 300 - timeFallOff * 5 && levelFrame < 800 - timeFallOff * 6) {
+        if (levelFrame % 10 == 0) {
+          objects.push({ type: "blast", x: 50, y: 50, rotation: levelFrame * Math.min(1.5 + levelNumber * .05, 2.5), size: 1, explosion: { delay: 30, expansion: 5, size: 10, decay: 10 } });
+        }
+      } else if (levelFrame == 850 - timeFallOff * 6) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 0, size: 1, explosion: { delay: 30 - delayFallOff * 5, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 90, size: 1, explosion: { delay: 30 - delayFallOff * 5, expansion: 5, size: 10, decay: 10 } });
+      } else if (levelFrame == 900 - timeFallOff * 7) {
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 45, size: 1, explosion: { delay: 30 - delayFallOff * 6, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: 50, y: 50, rotation: 135, size: 1, explosion: { delay: 30 - delayFallOff * 6, expansion: 5, size: 10, decay: 10 } });
       }
       break;
     }
   }
 
-  // Handle Objects
-  handleObjects();
-}
-
-var stop = false;
-
-function handleObjects() {
   // Canvas
   scale = Math.min(window.innerWidth, window.innerHeight) * .01 - .5;
   document.getElementById("canvas").setAttribute("width", scale * 100);
@@ -218,25 +255,23 @@ function handleObjects() {
         break;
       }
       case "blast": {
-        if (obj.age == undefined) {
-          obj.age = 0;
-        }
-        obj.age++;
-        if (obj.age >= obj.explosion.delay + obj.explosion.expansion + obj.explosion.decay) {
+        if (obj.explosion.delay + obj.explosion.expansion + obj.explosion.decay == 0) {
           objects.splice(obj, 1);
           break;
-        } else if (obj.age >= obj.explosion.delay + obj.explosion.expansion) {
-          obj.size -= obj.size / obj.explosion.expansion;
-        } else if (obj.age >= obj.explosion.delay) {
-          obj.size += obj.explosion.size / obj.explosion.expansion;
+        } else if (obj.explosion.delay + obj.explosion.expansion == 0) {
+          obj.size -= obj.size / obj.explosion.decay--;
+        } else if (obj.explosion.delay == 0) {
+          obj.size += (obj.explosion.size - obj.size) / obj.explosion.expansion--;
+        } else {
+          obj.explosion.delay--;
         }
-        drawLine(obj.x, obj.y, obj.rotation, obj.size, obj.age < obj.explosion.delay ? "#FFF8" : "#FFF");
+        drawLine(obj.x, obj.y, obj.rotation, obj.size, obj.explosion.delay == 0 ? "#FFF" : "#FFF8");
         const rotation = obj.rotation * Math.PI / 180;
         const x1 = obj.x - Math.cos(rotation) * 200;
         const y1 = obj.y - Math.sin(rotation) * 200;
         const x2 = obj.x + Math.cos(rotation) * 200;
         const y2 = obj.y + Math.sin(rotation) * 200;
-        if (obj.age >= obj.explosion.delay && (Math.abs((y2 - y1) * player.x - (x2 - x1) * player.y + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1)) * 2 < obj.size + 2)) {
+        if (obj.explosion.delay == 0 && (Math.abs((y2 - y1) * player.x - (x2 - x1) * player.y + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1)) * 2 < obj.size + 2)) {
           hit = true;
         }
         break;
@@ -261,11 +296,9 @@ function drawRect(x, y, width, height, color) {
   c.fillStyle = color;
   c.fillRect(x * scale, y * scale, width * scale, height * scale);
 }
-
 function clearRect(x, y, width, height) {
   c.clearRect(x * scale, y * scale, width * scale, height * scale);
 }
-
 function drawCircle(x, y, radius, color) {
   c.fillStyle = color;
   c.beginPath();
