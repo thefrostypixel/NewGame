@@ -13,7 +13,7 @@
       }
       @media (pointer: coarse) {
         html {
-          --vmin: calc(min(1vh, 1vw - 3px) - .5px); /* Replace 3px with a 50th of the space needed on each side for mobile control buttons */
+          --vmin: calc(min(1vh, 1vw, max(1vh, 1vw) - 4.5px) - .5px);
         }
       }
       body {
@@ -31,24 +31,62 @@
       }
       canvas, #text {
         position: fixed;
-        top: 0;
-        left: 0;
+        top: calc(50vh - 50 * var(--vmin));
+        left: calc(50vw - 50 * var(--vmin));
         width: calc(100 * var(--vmin));
         height: calc(100 * var(--vmin));
-        margin: calc(50vh - 50 * var(--vmin)) calc(50vw - 50 * var(--vmin));
       }
       #text-1 {
         color: #F88;
       }
+      #touch-controls #pause {
+        position: fixed;
+        top: 25px;
+        right: 25px;
+        width: 100px;
+        height: 100px;
+      }
+      #touch-controls #move {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 200px;
+        height: 200px;
+      }
+      @media (pointer: fine) {
+        #touch-controls {
+          display: none;
+        }
+      }
     </style>
   </head>
-  <body>
+  <body id="body">
     <canvas id="canvas" width="100" height="100" style="opacity: 1;"></canvas>
     <div id="text">
       <br>
       <div id="text-1">NEW<br>GAME</div>
       <br>
       <div id="text-2">MOVE TO<br>START...</div>
+    </div>
+    <div id="touch-controls">
+      <svg id="pause" viewBox="0 0 24 24" onclick="pause();">
+        <circle r="11.5" cx="12" cy="12" fill="none" stroke="#FFF" stroke-width="1"/>
+        <path d="M9 6L9 18   M15 6L15 18" fill="none" stroke="#FFF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg id="move" viewBox="0 0 48 48">
+        <circle r="23.5" cx="24" cy="24" fill="none" stroke="#FFF" stroke-width="1"/>
+        <path d="M20 10L24 6L28 10   M38 20L42 24L38 28   M20 38L24 42L28 38   M10 20L6 24L10 28" fill="none" stroke="#FFF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(22.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(67.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(112.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(157.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(202.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(247.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(292.5 24 24)"/>
+        <path d="M24 1L24 24" fill="none" stroke="#F00" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" transform="rotate(337.5 24 24)"/>
+        <circle r="9.5" cx="24" cy="24" stroke="#F00" stroke-width="1"/>
+      </svg>
     </div>
     <script src="script.js"></script>
   </body>
