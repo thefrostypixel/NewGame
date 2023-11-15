@@ -37,8 +37,8 @@ document.getElementById("move").addEventListener("contextmenu", (event) => {
   event.preventDefault();
 });
 function touchMove(event) {
-  var x = event.changedTouches[0].clientX - document.getElementById("move").getBoundingClientRect().top - 100;
-  var y = event.changedTouches[0].clientY - document.getElementById("move").getBoundingClientRect().top - 100;
+  var x = event.changedTouches[0].clientX - document.getElementById("move").getBoundingClientRect().left - 50;
+  var y = event.changedTouches[0].clientY - document.getElementById("move").getBoundingClientRect().top - 50;
   var angle = Math.atan2(y, x) * 180 / Math.PI + 22.5;
   if (angle < 0) {
     angle += 360;
@@ -47,7 +47,7 @@ function touchMove(event) {
   down = false;
   left = false;
   right = false;
-  if (x * x + y * y > 1600) {
+  if (x * x + y * y > 400) {
     if (angle < 90 || angle >= 315) {
       right = true;
     } else if (angle >= 135 && angle < 270) {
@@ -64,6 +64,7 @@ function touchMove(event) {
       document.getElementById("text-2").innerText = "";
     }
   }
+  event.preventDefault();
 }
 document.getElementById("move").addEventListener("touchstart", touchMove);
 document.getElementById("move").addEventListener("touchmove", touchMove);
@@ -134,11 +135,7 @@ function frame() {
       levelNumber = -1;
     }
     if (notStarted >= 20) {
-      if (matchMedia("(pointer: fine)").matches) {
-        scale = Math.min(window.innerWidth, window.innerHeight) * .01 - .5;
-      } else {
-        scale = Math.min(window.innerHeight, window.innerWidth, Math.max(window.innerHeight, window.innerWidth) - 450) * .01 - .5;
-      }
+      scale = Math.max(window.innerWidth, window.innerHeight) * .01;
       document.getElementById("canvas").setAttribute("width", scale * 100);
       document.getElementById("canvas").setAttribute("height", scale * 100);
       drawRect(0, 0, 100, 100, "#FFF");
@@ -308,11 +305,7 @@ function frame() {
   }
 
   // Canvas
-  if (matchMedia("(pointer: fine)").matches) {
-    scale = Math.min(window.innerWidth, window.innerHeight) * .01 - .5;
-  } else {
-    scale = Math.min(window.innerHeight, window.innerWidth, Math.max(window.innerHeight, window.innerWidth) - 450) * .01 - .5;
-  }
+  scale = Math.max(window.innerWidth, window.innerHeight) * .01;
   document.getElementById("canvas").setAttribute("width", scale * 100);
   document.getElementById("canvas").setAttribute("height", scale * 100);
 
