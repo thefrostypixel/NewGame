@@ -27,7 +27,7 @@ document.addEventListener("keyup", function(event) {
     left = false;
   } else if (event.key === "ArrowRight" || event.key === "d") {
     right = false;
-  } else if (event.key === "Escape") {
+  } else if (event.key === "Escape" && notStarted == -1) {
     paused = !paused;
     document.getElementById("canvas").style.opacity = paused ? .5 : 1;
     document.getElementById("text-1").innerText = paused ? "\nPAUSED!\n" : "";
@@ -204,7 +204,6 @@ function frame() {
         bounds.height = 40;
         bounds.duration = 50;
       }
-      levelNumber = 20;
       var timeFallOff = Math.min(Math.floor(levelNumber * .5), 10);
       var delayFallOff = Math.min(Math.floor(levelNumber * .25), 5);
       if (levelFrame == 50) {
@@ -237,7 +236,20 @@ function frame() {
       }
       break;
     }
-    // TODO Rings
+    case 4: {
+      if (levelFrame == 0) {
+        bounds.x = 0;
+        bounds.y = 0;
+        bounds.width = 100;
+        bounds.height = 100;
+        bounds.duration = 50;
+      }
+      if (levelFrame % 100 == 0 && levelFrame < 900) {
+        objects.push({ type: "ring", x: Math.random() * 60 + 20, y: Math.random() * 60 + 20, radius: 115, finalRadius: 10, width: 1, vel: { x: 0, y: 0, radius: Math.max(levelNumber * -.005 - .5, -.6) } });
+      }
+      break;
+    }
+    // TODO Lines (Flappy Bird Style)
     // TODO Homing Bullets
   }
 
@@ -290,7 +302,26 @@ function frame() {
         }
         break;
       }
-      // TODO Rings
+      case "ring": {
+        obj.x += obj.vel.x;
+        obj.y += obj.vel.y;
+        if (obj.radius == obj.finalRadius) {
+          objects.splice(obj, 1);
+          break;
+        }
+        if (obj.radius > obj.finalRadius) {
+          obj.radius = Math.max(obj.radius + obj.vel.radius, obj.finalRadius);
+        } else if (obj.radius < obj.finalRadius) {
+          obj.radius = Math.min(obj.radius + obj.vel.radius, obj.finalRadius);
+        }
+        drawRing(obj.x, obj.y, obj.radius, obj.width, "#FFF");
+        var dif = Math.sqrt((obj.x - player.x) * (obj.x - player.x) + (obj.y - player.y) * (obj.y - player.y)) - obj.radius;
+        if (dif < obj.width * .5 + 1 && dif > obj.width * -.5 - 1) {
+          hit = true;
+        }
+        break;
+      }
+      // TODO Lines
       // TODO Homing Bullets
     }
   }
@@ -319,6 +350,13 @@ function drawCircle(x, y, radius, color) {
   c.beginPath();
   c.arc(x * scale, y * scale, radius * scale, 0, 2 * Math.PI);
   c.fill();
+}
+function drawRing(x, y, radius, width, color) {
+  c.strokeStyle = color;
+  c.beginPath();
+  c.arc(x * scale, y * scale, radius * scale, 0, 2 * Math.PI);
+  c.lineWidth = width * scale;
+  c.stroke();
 }
 function drawLine(x, y, angle, size, color) {
   c.beginPath();
