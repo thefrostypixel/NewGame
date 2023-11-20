@@ -27,63 +27,13 @@ document.addEventListener("keyup", function(event) {
     left = false;
   } else if (event.key === "ArrowRight" || event.key === "d") {
     right = false;
-  } else if (event.key === "Escape") {
-    pause();
-  }
-});
-
-// Touch Controls
-document.getElementById("move").addEventListener("contextmenu", (event) => {
-  event.preventDefault();
-});
-function touchMove(event) {
-  var x = event.changedTouches[0].clientX - document.getElementById("move").getBoundingClientRect().left - 50;
-  var y = event.changedTouches[0].clientY - document.getElementById("move").getBoundingClientRect().top - 50;
-  var angle = Math.atan2(y, x) * 180 / Math.PI + 22.5;
-  if (angle < 0) {
-    angle += 360;
-  }
-  up = false;
-  down = false;
-  left = false;
-  right = false;
-  if (x * x + y * y > 400) {
-    if (angle < 90 || angle >= 315) {
-      right = true;
-    } else if (angle >= 135 && angle < 270) {
-      left = true;
-    }
-    if (angle >= 45 && angle < 180) {
-      down = true;
-    } else if (angle >= 225) {
-      up = true;
-    }
-    if (notStarted >= 20) {
-      notStarted = -1;
-      document.getElementById("text-1").innerText = "";
-      document.getElementById("text-2").innerText = "";
-    }
-  }
-  event.preventDefault();
-}
-document.getElementById("move").addEventListener("touchstart", touchMove);
-document.getElementById("move").addEventListener("touchmove", touchMove);
-document.getElementById("move").addEventListener("touchend", () => {
-  up = false;
-  down = false;
-  left = false;
-  right = false;
-});
-
-// Pausing
-function pause() {
-  if (notStarted == -1) {
+  } else if (event.key === "Escape" && notStarted == -1) {
     paused = !paused;
     document.getElementById("canvas").style.opacity = paused ? .5 : 1;
     document.getElementById("text-1").innerText = paused ? "\nPAUSED!\n" : "";
-    document.getElementById("text-2").innerText = paused ? "PRESS ESC\nOR PAUSE TO\nCONTINUE..." : "";
+    document.getElementById("text-2").innerText = paused ? "PRESS ESC TO\nCONTINUE..." : "";
   }
-}
+});
 
 // Held Keys
 var up = false;
@@ -118,7 +68,6 @@ var levelNumber = -1;
 function frame() {
   // Handle Paused Or Not Started
   if (paused) {
-    // TODO Make Sure It Is Still Drawing To The Canvas To Prevent Pausing At A Small Screen Size And Resizing To A Larger Screen From Looking Bad?
     return;
   }
   if (notStarted >= 0) {
@@ -135,7 +84,7 @@ function frame() {
       levelNumber = -1;
     }
     if (notStarted >= 20) {
-      scale = Math.max(window.innerWidth, window.innerHeight) * .01;
+      scale = Math.min(window.innerWidth, window.innerHeight) * .01;
       document.getElementById("canvas").setAttribute("width", scale * 100);
       document.getElementById("canvas").setAttribute("height", scale * 100);
       drawRect(0, 0, 100, 100, "#FFF");
@@ -207,7 +156,7 @@ function frame() {
         bounds.height = 40;
         bounds.duration = 50;
       }
-      if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 900) {
+      if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 850) {
         if (Math.random() * 4 < 1) {
           objects.push({ type: "bullet", x: Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 } });
         } else if (Math.random() * 3 < 1) {
@@ -305,7 +254,7 @@ function frame() {
   }
 
   // Canvas
-  scale = Math.max(window.innerWidth, window.innerHeight) * .01;
+  scale = Math.min(window.innerWidth, window.innerHeight) * .01 - .5;
   document.getElementById("canvas").setAttribute("width", scale * 100);
   document.getElementById("canvas").setAttribute("height", scale * 100);
 
