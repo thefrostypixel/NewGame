@@ -158,13 +158,13 @@ function frame() {
       }
       if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 850) {
         if (Math.random() * 4 < 1) {
-          objects.push({ type: "bullet", x: Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 } });
+          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 } });
         } else if (Math.random() * 3 < 1) {
-          objects.push({ type: "bullet", x: -5, y: Math.random() * 30 + 35, size: 5, vel: { x: .5, y: 0 } });
+          objects.push({ type: "bullet", x: -5, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: .5, y: 0 } });
         } else if (Math.random() * 2 < 1) {
-          objects.push({ type: "bullet", x: Math.random() * 30 + 35, y: 105, size: 5, vel: { x: 0, y: -.5 } });
+          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: 105, size: 5, vel: { x: 0, y: -.5 } });
         } else {
-          objects.push({ type: "bullet", x: 105, y: Math.random() * 30 + 35, size: 5, vel: { x: -.5, y: 0 } });
+          objects.push({ type: "bullet", x: 105, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: -.5, y: 0 } });
         }
       }
       break;
@@ -192,7 +192,7 @@ function frame() {
         bounds.duration = 50;
       }
       if (levelFrame % Math.max(40 - levelNumber, 20) == 0 && levelFrame <= 930) {
-        objects.push({ type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 50, expansion: 5, size: 10, decay: 10 } });
+        objects.push({ type: "blast", x: player.x, y: player.y, rotation: Math.random() * 360, size: 1, explosion: { delay: 50, expansion: 5, size: 15, decay: 10 } });
       }
       break;
     }
