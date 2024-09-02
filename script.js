@@ -45,7 +45,7 @@ var right = false;
 var c = document.getElementById("canvas").getContext("2d");
 
 // Debug Settings
-var debug = { startLevel: 0, noBoundsColl: false, noObjColl: false };
+var debug = { startLevel: 5, noBoundsColl: false, noObjColl: false };
 
 // Player Position
 var player = { x: 50, y: 50, speed: .5 };
@@ -158,13 +158,13 @@ function frame() {
       }
       if (levelFrame % Math.max(50 - levelNumber, 20) == 0 && levelFrame <= 850) {
         if (Math.random() * 4 < 1) {
-          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 } });
+          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: -5, size: 5, vel: { x: 0, y: .5 + levelNumber * .02 } });
         } else if (Math.random() * 3 < 1) {
-          objects.push({ type: "bullet", x: -5, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: .5, y: 0 } });
+          objects.push({ type: "bullet", x: -5, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: .5 + levelNumber * .02, y: 0 } });
         } else if (Math.random() * 2 < 1) {
-          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: 105, size: 5, vel: { x: 0, y: -.5 } });
+          objects.push({ type: "bullet", x: Math.random() < .2 ? Math.max(35, Math.min(65, player.x)) : Math.random() * 30 + 35, y: 105, size: 5, vel: { x: 0, y: -.5 - levelNumber * .02 } });
         } else {
-          objects.push({ type: "bullet", x: 105, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: -.5, y: 0 } });
+          objects.push({ type: "bullet", x: 105, y: Math.random() < .2 ? Math.max(35, Math.min(65, player.y)) : Math.random() * 30 + 35, size: 5, vel: { x: -.5 - levelNumber * .02, y: 0 } });
         }
       }
       break;
@@ -249,8 +249,25 @@ function frame() {
       }
       break;
     }
-    // TODO Lines (Flappy Bird Style)
-    // TODO Homing Bullets
+	case 5: {
+      if (levelFrame == 0) {
+        bounds.x = 0;
+        bounds.y = 0;
+        bounds.width = 100;
+        bounds.height = 100;
+        bounds.duration = 50;
+      }
+      if (levelFrame % 100 == 0 && levelFrame < 900) {
+		let vertical = levelFrame % 200 == 0;
+		let pos = Math.random() * 60 - 85;
+		let speed = .5 + levelNumber * .02;
+        objects.push({ type: "block", x: vertical ? 0 : pos, y: vertical ? pos : 0, width: vertical ? 1 : 100, height: vertical ? 100 : 1, vel: { x: vertical ? speed : 0, y: vertical ? 0 : speed } });
+        objects.push({ type: "block", x: vertical ? 0 : pos + 110, y: vertical ? pos + 110 : 0, width: vertical ? 1 : 100, height: vertical ? 100 : 1, vel: { x: vertical ? speed : 0, y: vertical ? 0 : speed } });
+        objects.push({ type: "block", x: vertical ? 100 : pos, y: vertical ? pos : 100, width: vertical ? 1 : 100, height: vertical ? 100 : 1, vel: { x: vertical ? -speed : 0, y: vertical ? 0 : -speed } });
+        objects.push({ type: "block", x: vertical ? 100 : pos + 110, y: vertical ? pos + 110 : 100, width: vertical ? 1 : 100, height: vertical ? 100 : 1, vel: { x: vertical ? -speed : 0, y: vertical ? 0 : -speed } });
+      }
+	}
+    // TODO Homing Bullets (That Maybe Explode)
   }
 
   // Canvas
@@ -276,6 +293,19 @@ function frame() {
         }
         drawCircle(obj.x, obj.y, obj.size, "#FFF");
         if ((obj.x - player.x) * (obj.x - player.x) + (obj.y - player.y) * (obj.y - player.y) < (obj.size + 1) * (obj.size + 1)) {
+          hit = true;
+        }
+        break;
+      }
+      case "block": {
+        obj.x += obj.vel.x;
+        obj.y += obj.vel.y;
+        if (obj.x < -obj.width || obj.y < -obj.height || obj.x > obj.width + 100 || obj.y > obj.height + 100) {
+          objects.splice(obj, 1);
+          break;
+        }
+        drawRect(obj.x, obj.y, obj.width, obj.height, "#FFF");
+        if (player.x + 1 >= obj.x && player.x - 1 <= obj.x + obj.width && player.y + 1 >= obj.y && player.y - 1 <= obj.y + obj.height) {
           hit = true;
         }
         break;
@@ -321,8 +351,7 @@ function frame() {
         }
         break;
       }
-      // TODO Lines
-      // TODO Homing Bullets
+      // TODO Homing Bullets (That Maybe Explode)
     }
   }
 
